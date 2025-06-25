@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>weather App</title>
+    <style>
+        body {
+            front-family:Arial, Sans-serif;
+            text-align: center ;
+            padding :20px;
+            background:#eef2f3;
+        }
+        #weather {
+            margin-top:20px;
+            padding: 20px;
+            border:1px solid #ccc;
+            background:white;
+            display:inline-block;
+            border-radius:8px;
+        }
+        input {
+            padding:8px;
+            front-size:16px;
+        }
+        button {
+            padding:8px 12px;
+            front-size:16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>weather App</h1>
+    <input type+"text" id="city" placeholder="enter city name">
+    <button onclick="getweather ()">get weather</button>
+    <div id="weather"></div>
+    <script>
+        async function getweather() {
+            const city= document.getElementById('Delhi').value;
+            const apikey='your_API_KEY_HERE';
+            const url='https://api.openweathermap.org/data/2.5/weather?q=${Delhi}&appid=${apikey}&units=metric';
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if(data.cod=== 200) {
+                    document.getElementById('weather').innerHTML='<h2>${data.name},${data.sys.country}<h2>
+                        <p>temperature:${data.main.temp}degreecelcius</p>';
+                }else{
+
+                document.getElementById('weather') .innerHTML='<p>${data.message}</p>';
+            }
+        } catch (error) {
+            document.getElementById('weather').innerHTML='<p>error fetching data.</p>';
+        }
+    }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Chat with Time</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #messages { list-style: none; padding: 0; }
+        #messages li { padding: 8px; margin-bottom: 4px; background: #f1f1f1; border-radius: 4px; }
+        #form { display: flex; margin-top: 10px; }
+        #input { flex: 1; padding: 10px; }
+        #send { padding: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Live Chat</h2>
+    <ul id="messages"></ul>
+    <form id="form">
+        <input id="input" autocomplete="off" placeholder="Type a message..." />
+        <button id="send">Send</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>document Editor</title>
+<style>
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function App() {
+  const [documents, setDocuments] = useState([]);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [editingId, setEditingId] = useState(null);
+
+  // Fetch all documents
+  const loadDocs = async () => {
+    const res = await axios.get('http://localhost:5000/documents');
+    setDocuments(res.data);
+  };
+
+  // Save or update document
+  const saveDoc = async () => {
+    if (!title || !content) {
+      alert("Title and content cannot be empty!");
+      return;
+    }
+
+    if (editingId) {
+      await axios.put(http://localhost:5000/documents/${editingId}, { title, content });
+    } else {
+      await axios.post('http://localhost:5000/documents', { title, content });
+    }
+
+    setTitle('');
+    setContent('');
+    setEditingId(null);
+    loadDocs();
+  };
+
+  // Delete a document
+  const deleteDoc = async (id) => {
+    await axios.delete(http://localhost:5000/documents/${id});
+    loadDocs();
+  };
+
+// Load document data for editing
+  const editDoc = (doc) => {
+    setTitle(doc.title);
+    setContent(doc.content);
+    setEditingId(doc._id);
+  };
+
+  useEffect(() => {
+    loadDocs();
+  }, []);
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>Document Editor</h1>
+      <input
+        type="text"
+        placeholder="Enter title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        style={{ width: '100%', marginBottom: 10, padding: 10 }}
+      />
+      <textarea
+        placeholder="Enter content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        rows={10}
+        style={{ width: '100%', padding: 10 }}
+      ></textarea>
+      <button onClick={saveDoc} style={{ marginTop: 10 }}>
+        {editingId ? 'Update Document' : 'Save Document'}
+      </button>
+</style>
+</head>
+<body>
+      <h2 style={{ marginTop: 30 }}>Your Documents</h2>
+      {documents.map((doc) => (
+        <div key={doc._id} style={{ border: '1px solid #ccc', marginBottom: 10, padding: 10 }}>
+          <h3>{doc.title}</h3>
+          <p>{doc.content.slice(0, 100)}...</p>
+          <button onClick={() => editDoc(doc)}>Edit</button>
+  <button onClick={() => deleteDoc(doc._id)} style={{ marginLeft: 10 }}>Delete</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fronted dashboard</title>
+</head>
+<body>
+    import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { classifyWebsite } from "./utils/classifier";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+
+function App() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:5000/api/weekly-report")
+      .then(res => {
+        const grouped = {};
+
+        res.data.forEach(entry => {
+          const domain = new URL(entry.url).hostname;
+          if (!grouped[domain]) grouped[domain] = 0;
+          grouped[domain] += entry.duration;
+        });
+
+        const result = Object.keys(grouped).map(site => ({
+          site,
+          time: Math.round(grouped[site] / 1000), // convert ms to seconds
+          category: classifyWebsite(site)
+        }));
+
+        setData(result);
+      });
+  }, []);
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>📊 Productivity Dashboard</h1>
+      <table border="1" cellPadding="10">
+        <thead>
+          <tr>
+            <th>Website</th>
+            <th>Time (s)</th>
+            <th>Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map(entry => (
+            <tr key={entry.site}>
+              <td>{entry.site}</td>
+              <td>{entry.time}</td>
+              <td>{entry.category}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2>Time Spent Chart</h2>
+      <BarChart width={600} height={300} data={data}>
+        <XAxis dataKey="site" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Bar dataKey="time" fill="#8884d8" />
+      </BarChart>
+    </div>
+  );
+}
+
+</body>
+</html>
